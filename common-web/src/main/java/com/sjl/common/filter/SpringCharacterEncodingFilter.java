@@ -15,7 +15,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 /**
  * Springmvc get乱码问题解决
- * 
+ * <p>8.0以上tomcat get不会乱码</p>
  * @author Kelly
  * @version 1.0.0
  * @filename SpringCharacterEncodingFilter.java
@@ -23,6 +23,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
  * @copyright(C) 2020 song
  */
 public class SpringCharacterEncodingFilter extends CharacterEncodingFilter {
+	private static int serverVersion;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -34,6 +36,17 @@ public class SpringCharacterEncodingFilter extends CharacterEncodingFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		// 获取服务器信息，判断是不是Tomcat8以上的版本
+		String serverInfo = getFilterConfig().getServletContext().getServerInfo();
+		// 两种版本的serverInfo示例：Apache Tomcat/7.0.69 、Apache Tomcat/8.0.36
+		if (serverVersion == 0 && serverInfo.startsWith("Apache Tomcat")) {
+			// 获取主版本
+			serverVersion = Integer.parseInt(serverInfo.substring(14, 15));
+		}
+		if (serverVersion >= 8){
+			super.doFilterInternal(request, response, filterChain);
+			return;
+		}
 		// 解决get乱码
 		EncodingRequest encodingRequest = new EncodingRequest((HttpServletRequest) request);
 
