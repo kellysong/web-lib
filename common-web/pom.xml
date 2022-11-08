@@ -14,6 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.1.4.RELEASE</spring.version>
 		<jackson.version>2.5.0</jackson.version>
+		<mysql.version>5.1.9</mysql.version>
 	</properties>
 
 	<repositories>
@@ -99,7 +100,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.34</version>
+			<version>${mysql.version}</version>
 		</dependency>
 
 		<!-- c3p0数据源 -->
