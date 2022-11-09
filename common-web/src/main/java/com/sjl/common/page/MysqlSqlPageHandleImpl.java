@@ -6,7 +6,7 @@ package com.sjl.common.page;
  */
 public class MysqlSqlPageHandleImpl implements SqlPageHandle {
 
-
+	@Override
 	public String handlerPagingSQL(String oldSQL, int pageNo, int pageSize) {
 		StringBuffer sql = new StringBuffer(oldSQL);
 		if (pageSize > 0) {

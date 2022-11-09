@@ -11,6 +11,7 @@ package com.sjl.common.page;
 public class OracleSqlPageHandleImpl implements SqlPageHandle {
 
 
+	@Override
 	public String handlerPagingSQL(String oldSQL, int pageNo, int pageSize) {
 		if (pageSize > 0) {
 			int startIndex = (pageNo - 1) * pageSize; 
