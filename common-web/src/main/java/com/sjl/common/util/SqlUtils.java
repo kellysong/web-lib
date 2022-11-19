@@ -1,5 +1,8 @@
 package com.sjl.common.util;
 
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,5 +46,69 @@ public class SqlUtils {
 	public static void setInSql(List<Object> params, StringBuffer sqlBuffer, String column, String valuesString) {
 		String[] values = valuesString.split(",");
 		setInSql(params, sqlBuffer, column, values);
+	}
+
+	/**
+	 * 字符串参数转成整型数组
+	 * @param valuesString
+	 * @return
+	 */
+	public static Integer[] getIntegerValue(String valuesString){
+		List<Integer> integerValues = new ArrayList<Integer>();
+		if(!StringUtils.isEmpty(valuesString)){
+			if(valuesString.indexOf(",") > -1){
+				String[] values = valuesString.split(",");
+				for (String value : values) {
+					if(!StringUtils.isEmpty(value)){
+						integerValues.add(Integer.valueOf(value.trim()));
+					}
+				}
+			}else{
+				integerValues.add(Integer.valueOf(valuesString.trim()));
+			}
+			return integerValues.toArray(new Integer[integerValues.size()]);
+		}
+		return null;
+	}
+
+	/**
+	 *
+	 * @param sqlBuffer StringBuffer
+	 * @param column String，表字段，当column=user_name，生成如下：user_id in (1, 2)
+	 * @param values Integer[]，数组值
+	 */
+	public static void getInSql(StringBuffer sqlBuffer, String column, Integer[] values) {
+		if(values == null || values.length < 1){
+			throw new RuntimeException("参数值不能为空");
+		}
+		sqlBuffer.append(" ").append("and").append(" ").append(column).append(" ").append("in (");
+		for (Integer value : values) {
+			if(value != null){
+				sqlBuffer.append(" ").append(value).append(",");
+			}
+		}
+		sqlBuffer.delete(sqlBuffer.length() - 1, sqlBuffer.length());
+		sqlBuffer.append(" ").append(")");
+	}
+
+
+	/**
+	 *
+	 * @param sqlBuffer StringBuffer
+	 * @param column String，表字段，当column=user_name，生成如下：user_name in ('a','b')
+	 * @param values String[]，数组值
+	 */
+	public static void getInSql(StringBuffer sqlBuffer, String column, String[] values) {
+		if(values == null || values.length < 1){
+			throw new RuntimeException("参数值不能为空");
+		}
+		sqlBuffer.append(" ").append("and").append(" ").append(column).append(" ").append("in (");
+		for (String value : values) {
+			if(value != null){
+				sqlBuffer.append(" '").append(value).append("',");
+			}
+		}
+		sqlBuffer.delete(sqlBuffer.length() - 1, sqlBuffer.length());
+		sqlBuffer.append(" ").append(")");
 	}
 }

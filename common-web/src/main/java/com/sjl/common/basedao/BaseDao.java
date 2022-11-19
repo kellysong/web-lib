@@ -7,12 +7,11 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -25,12 +24,12 @@ import java.util.Map;
 /**
  * JdbcTemplate BaseDao
  * <p>BeanPropertyRowMapper自动映射实体类，实体类无须实现RowMapper接口，前提是表的列名和类的属性名必须一致或者下划线分隔的列名也行</p>
+ * <p>不能直接注入BaseDao，继承使用</p>
  *
  * @param <T>
  * @author song
  */
-@Repository("baseDao")
-public class BaseDao<T> implements IBaseDao<T, Integer> {
+public class BaseDao<T> implements IBaseDao<T> {
     private static final Logger LOGGER = Logger.getLogger(BaseDao.class);
     private static boolean DEBUG = false;
     @Autowired
@@ -165,7 +164,7 @@ public class BaseDao<T> implements IBaseDao<T, Integer> {
 
     @SuppressWarnings("deprecation")
     @Override
-    public Integer countTotal(String sql) {
+    public int countTotal(String sql) {
         int count = jdbcTemplate.queryForInt(sql);
         return count;
     }
@@ -178,7 +177,7 @@ public class BaseDao<T> implements IBaseDao<T, Integer> {
 
     @Override
     public <T> Page<T> queryPagination(String sql, Object[] params, int pageNo, int pageSize, Class<T> classT) {
-        return queryPagination(sql, params, pageNo, pageSize, new BeanPropertyRowMapper<T>(getEntityClass()));
+        return queryPagination(sql, params, pageNo, pageSize, new BeanPropertyRowMapper<T>(classT));
     }
 
     @Override
@@ -209,7 +208,7 @@ public class BaseDao<T> implements IBaseDao<T, Integer> {
 
     // 验证通过
     @Override
-    public Integer update(String sql, Object... params) {
+    public int update(String sql, Object... params) {
         int ret = -1;
         try {
             if (params == null || params.length == 0) {
@@ -226,7 +225,28 @@ public class BaseDao<T> implements IBaseDao<T, Integer> {
 
 
     @Override
-    public Integer update(String sql, SqlParameterSource paramSource) {
+    public long updateWithKey(String sql, Object... params) {
+        if (params == null) {
+            throw new NullPointerException("params 不能为空");
+        }
+        //自动生成int array of JDBC types
+        int[] types = new int[params.length];
+        for (int i = 0; i < params.length; i++) {
+            Object param = params[i];
+            types[i] = StatementCreatorUtils.javaTypeToSqlParameterType(param.getClass());
+        }
+        PreparedStatementCreatorFactory preparedStatementCreatorFactory = new PreparedStatementCreatorFactory(sql, types);
+        //设置PreparedStatement是否返回自动生成的主键
+        preparedStatementCreatorFactory.setReturnGeneratedKeys(true);
+        //获取PreparedStatementCreator
+        PreparedStatementCreator preparedStatementCreator = preparedStatementCreatorFactory.newPreparedStatementCreator(params);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(preparedStatementCreator, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
+    @Override
+    public int update(String sql, SqlParameterSource paramSource) {
         int ret = namedParameterJdbcTemplate.update(sql, paramSource);
         return ret;
     }

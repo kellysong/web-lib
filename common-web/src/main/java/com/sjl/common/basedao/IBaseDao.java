@@ -5,16 +5,14 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @param <T>
- * @param <PK>
  * @author song
  */
-interface IBaseDao<T, PK extends Serializable> {
+public interface IBaseDao<T> {
 
     /**
      * 无参数查询实体
@@ -171,7 +169,7 @@ interface IBaseDao<T, PK extends Serializable> {
      * @param sql 查询sql
      * @return
      */
-    PK countTotal(String sql);
+    int countTotal(String sql);
 
     /**
      * 删除，更新，增加操作
@@ -180,7 +178,7 @@ interface IBaseDao<T, PK extends Serializable> {
      * @param params 附加参数
      * @return
      */
-    PK update(String sql, Object... params);
+    int update(String sql, Object... params);
 
 
     /**
@@ -190,7 +188,15 @@ interface IBaseDao<T, PK extends Serializable> {
      * @param paramSource 附加参数
      * @return
      */
-    PK update(String sql, SqlParameterSource paramSource);
+    int update(String sql, SqlParameterSource paramSource);
+
+    /**
+     * 插入返回主键
+     * @param sql  sql
+     * @param params 附加参数,插入时不能为空
+     * @return
+     */
+    long updateWithKey(String sql,Object... params);
 
     /**
      * 批量删除，更新，增加操作
