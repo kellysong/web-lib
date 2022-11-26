@@ -233,6 +233,10 @@ public class BaseDao<T> implements IBaseDao<T> {
         int[] types = new int[params.length];
         for (int i = 0; i < params.length; i++) {
             Object param = params[i];
+            if (param == null) {
+                types[i] = SqlTypeValue.TYPE_UNKNOWN;
+                continue;
+            }
             types[i] = StatementCreatorUtils.javaTypeToSqlParameterType(param.getClass());
         }
         PreparedStatementCreatorFactory preparedStatementCreatorFactory = new PreparedStatementCreatorFactory(sql, types);
