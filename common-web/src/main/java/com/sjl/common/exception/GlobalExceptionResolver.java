@@ -32,7 +32,7 @@ public class GlobalExceptionResolver {
 	public ApiResponse handleException(Exception e) {
 		// 打印异常堆栈信息
 		LOGGER.error("发生全局异常",e);
-		return ApiResponse.build(ErrorCode.ERROR_FAIL, e.getMessage());
+		return ApiResponse.fail(e.getMessage());
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class GlobalExceptionResolver {
 	@ResponseBody
 	public ApiResponse handleBaseDaoException(BaseDaoException e) {
 		LOGGER.error("发生全局dao异常",e);
-		return ApiResponse.build(ErrorCode.ERROR_FAIL, e.getMessage() + ":" + e.getCause());
+		return ApiResponse.fail(e.getMessage() + ":" + e.getCause());
 	}
 
 }
